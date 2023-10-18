@@ -31,11 +31,13 @@ import {
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Handle logins
 const loginHandler = () => {
   const provider = new GoogleAuthProvider();
   signInWithPopup(auth, provider);
 };
 
+// Handle logout
 const logoutHandler = () => {
   signOut(auth);
 };
@@ -44,20 +46,27 @@ function App() {
   const [user, setUser] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+
+  // useRef use for scroll till end of message
   const divForScroll = useRef(null);
 
+  // Handle new messages and 
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
       setMessage("");
+      // create a new message
       await addDoc(collection(db, "Message"), {
         text: message,
         uid: user.uid,
         uri: user.photoURL,
         createdAt: serverTimestamp(),
       });
+
+      // Scroll to the last message with smooth scrolling
       divForScroll.current.scrollIntoView({ behavior: "smooth" });
     } catch (error) {
+      // handle error
       alert(error.message);
     }
   };
@@ -65,6 +74,7 @@ function App() {
   useEffect(() => {
     
     const q = query(collection(db, "Message"), orderBy("createdAt", "asc"));
+    
     const unSubscribe = onAuthStateChanged(auth, (data) => {
       setUser(data);
     });
